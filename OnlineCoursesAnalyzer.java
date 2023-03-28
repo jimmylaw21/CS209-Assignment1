@@ -1,19 +1,44 @@
-package Assignment1;
 
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+//补全Javadoc, Javadoc tag '@author' 前面应有一个空行
+/**
+ * This class is used to analyze the online courses dataset.
+ *
+ * @version 1.0
+ * @since 1.0
+ */
 public class OnlineCoursesAnalyzer {
   private final List<Course> courses;
   private final Set<String> instuctors;
+
+  /**
+   * This constructor is used to read the dataset and store the data in the
+   * corresponding data structure.
+   *
+   * @param datasetPath the path of the dataset
+   */
   public OnlineCoursesAnalyzer(String datasetPath) {
     courses = new ArrayList<>();
     // read CSV file Using UTF-8 encoding
 
     try (BufferedReader br = new BufferedReader(new InputStreamReader(
-        new FileInputStream(datasetPath),"UTF-8"))) {
+        new FileInputStream(datasetPath), "UTF-8"))) {
       // skip header
       br.readLine();
       String line;
@@ -24,9 +49,9 @@ public class OnlineCoursesAnalyzer {
             values[0],
             values[1],
             parseDate(values[2]),
-            values[3].replace("\"",""),
-            Arrays.asList(values[4].replace("\"","").split(", ")),
-            values[5].replace("\"",""),
+            values[3].replace("\"", ""),
+            Arrays.asList(values[4].replace("\"", "").split(", ")),
+            values[5].replace("\"", ""),
             Integer.parseInt(values[6]),
             Boolean.parseBoolean(values[7]),
             Integer.parseInt(values[8]),
@@ -52,14 +77,26 @@ public class OnlineCoursesAnalyzer {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    instuctors = courses.stream().flatMap(course -> course.getInstructors().stream()).collect(Collectors.toSet());
+    instuctors = courses.stream()
+            .flatMap(course -> course.getInstructors().stream()).collect(Collectors.toSet());
   }
 
+  /**
+   * This method is used to get the number of courses in the dataset.
+   *
+   * @return the number of courses in the dataset
+   */
   public static LocalDate parseDate(String date) {
     String[] values = date.split("/");
-    return LocalDate.of(Integer.parseInt(values[2]), Integer.parseInt(values[0]), Integer.parseInt(values[1]));
+    return LocalDate.of(Integer.parseInt(values[2]),
+            Integer.parseInt(values[0]), Integer.parseInt(values[1]));
   }
 
+  /**
+   * This method is used to get the number of courses in the dataset.
+   *
+   * @return the number of courses in the dataset
+   */
   public static String[] csvSplit(String str) {
     List<String> list = new ArrayList<>();
     int start = 0;
@@ -79,32 +116,56 @@ public class OnlineCoursesAnalyzer {
     return list.toArray(new String[0]);
   }
 
-  public Map<String, Integer> getPtcpCountByInst(){
+  /**
+   * This method is used to get the number of courses in the dataset.
+   *
+   * @return the number of courses in the dataset
+   */
+  public Map<String, Integer> getPtcpCountByInst() {
     return courses.stream()
-        .collect(Collectors.groupingBy(Course::getInstitution, Collectors.summingInt(Course::getParticipantsCount)))
+        .collect(Collectors.groupingBy(Course::getInstitution,
+                Collectors.summingInt(Course::getParticipantsCount)))
         .entrySet().stream()
         .sorted(Map.Entry.comparingByKey())
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
-  }
-  public Map<String, Integer> getPtcpCountByInstAndSubject(){
-    return courses.stream()
-        .collect(Collectors.groupingBy(course -> course.getInstitution() + "-" + course.getCourseSubject(), Collectors.summingInt(Course::getParticipantsCount)))
-        .entrySet().stream()
-        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+        .collect(Collectors.toMap(Map.Entry::getKey,
+                Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
   }
 
-  public Map<String, List<List<String>>> getCourseListOfInstructor(){
+  /**
+   * This method is used to get the number of courses in the dataset.
+   *
+   * @return the number of courses in the dataset
+   */
+  public Map<String, Integer> getPtcpCountByInstAndSubject() {
+    return courses.stream()
+        .collect(Collectors.groupingBy(
+                course -> course.getInstitution() + "-" + course.getCourseSubject(),
+                Collectors.summingInt(Course::getParticipantsCount)))
+        .entrySet().stream()
+        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+        .collect(Collectors.toMap(Map.Entry::getKey,
+                Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+  }
+
+  /**
+   * This method is used to get the number of courses in the dataset.
+   *
+   * @return the number of courses in the dataset
+   */
+  public Map<String, List<List<String>>> getCourseListOfInstructor() {
     Map<String, List<List<String>>> map = new HashMap<>();
     for (String instuctor : instuctors) {
       List<String> independentCourses = courses.stream()
-          .filter(course -> course.getInstructors().contains(instuctor) && course.getInstructors().size() == 1)
+          .filter(course ->
+                  course.getInstructors().contains(instuctor)
+                          && course.getInstructors().size() == 1)
           .map(Course::getCourseTitle)
           .sorted()
           .distinct()
           .collect(Collectors.toList());
       List<String> coDevelopedCourses = courses.stream()
-          .filter(course -> course.getInstructors().contains(instuctor) && course.getInstructors().size() > 1)
+          .filter(course ->
+                  course.getInstructors().contains(instuctor) && course.getInstructors().size() > 1)
           .map(Course::getCourseTitle)
           .sorted()
           .distinct()
@@ -116,7 +177,13 @@ public class OnlineCoursesAnalyzer {
     }
     return map;
   }
-  public List<String> getCourses(int topK, String by){
+
+  /**
+   * This method is used to get the number of courses in the dataset.
+   *
+   * @return the number of courses in the dataset
+   */
+  public List<String> getCourses(int topK, String by) {
     return courses.stream()
         .sorted((a, b) -> {
           if (by.equals("hours")) {
@@ -139,10 +206,16 @@ public class OnlineCoursesAnalyzer {
         .collect(Collectors.toList());
   }
 
+  /**
+   * This method is used to get the number of courses in the dataset.
+   *
+   * @return the number of courses in the dataset
+   */
   public List<String> searchCourses(String courseSubject, double
-      percentAudited, double totalCourseHours){
+      percentAudited, double totalCourseHours) {
     return courses.stream()
-        .filter(course -> course.getCourseSubject().toLowerCase().contains(courseSubject.toLowerCase()))
+        .filter(course -> course.getCourseSubject().toLowerCase()
+                .contains(courseSubject.toLowerCase()))
         .filter(course -> course.getAuditedPercent() >= percentAudited)
         .filter(course -> course.getTotalCourseHours() <= totalCourseHours)
         .map(Course::getCourseTitle)
@@ -151,7 +224,12 @@ public class OnlineCoursesAnalyzer {
         .collect(Collectors.toList());
   }
 
-  public List<String> recommendCourses(int age, int gender, int isBachelorOrHigher){
+  /**
+   * This method is used to get the number of courses in the dataset.
+   *
+   * @return the number of courses in the dataset
+   */
+  public List<String> recommendCourses(int age, int gender, int isBachelorOrHigher) {
     List<List<Course>> courseList = courses.stream()
         .collect(Collectors.groupingBy(Course::getCourseNumber))
         .entrySet().stream()
@@ -165,7 +243,6 @@ public class OnlineCoursesAnalyzer {
           double avgMedianAge = 0.0;
           double avgMalePercent = 0.0;
           double avgBachelorsOrHigherPercent = 0.0;
-          double similarity;
           Course latestCourse = list.get(0);
           for (int i = 0; i < list.size(); i++) {
             avgMedianAge += list.get(i).getMedianAge();
@@ -178,14 +255,19 @@ public class OnlineCoursesAnalyzer {
           avgMedianAge /= list.size();
           avgMalePercent /= list.size();
           avgBachelorsOrHigherPercent /= list.size();
-          similarity = Math.pow(age-avgMedianAge, 2) + Math.pow(gender*100-avgMalePercent, 2) + Math.pow(isBachelorOrHigher*100-avgBachelorsOrHigherPercent, 2);
-          CourseStats courseStats = new CourseStats(latestCourse,avgMalePercent, avgMedianAge, avgBachelorsOrHigherPercent, similarity);
+          double similarity;
+          similarity = Math.pow(age - avgMedianAge, 2)
+                  + Math.pow(gender * 100 - avgMalePercent, 2)
+                  + Math.pow(isBachelorOrHigher * 100 - avgBachelorsOrHigherPercent, 2);
+          CourseStats courseStats = new CourseStats(latestCourse, avgMalePercent,
+                  avgMedianAge, avgBachelorsOrHigherPercent, similarity);
           return courseStats;
         })
         .collect(Collectors.toList());
 
     return courseStatsList.stream()
-        .sorted(Comparator.comparing(CourseStats::getSimilarity).thenComparing(CourseStats::getCourseTitle))
+        .sorted(Comparator.comparing(CourseStats::getSimilarity)
+                .thenComparing(CourseStats::getCourseTitle))
         .map(CourseStats::getCourseTitle)
         .distinct()
         .limit(10)
@@ -206,7 +288,8 @@ public class OnlineCoursesAnalyzer {
       this.bachelorsOrHigherPercent = course.getBachelorsOrHigherPercent();
     }
 
-    public CourseStats(Course course, double medianAge, double malePercent, double bachelorsOrHigherPercent, double similarity) {
+    public CourseStats(Course course, double medianAge,
+                       double malePercent, double bachelorsOrHigherPercent, double similarity) {
       this.course = course;
       this.medianAge = medianAge;
       this.malePercent = malePercent;
@@ -259,7 +342,7 @@ public class OnlineCoursesAnalyzer {
     }
   }
 
-  private double similarity(int age, int gender, int isBachelorOrHigher,Course course){
+  private double similarity(int age, int gender, int isBachelorOrHigher, Course course) {
     return Math.pow(age - course.getMedianAge(), 2)
         + Math.pow(gender * 100 - course.getMalePercent(), 2)
         + Math.pow(isBachelorOrHigher * 100 - course.getBachelorsOrHigherPercent(), 2);
